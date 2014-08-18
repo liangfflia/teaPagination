@@ -333,7 +333,33 @@ class teaPagination {
             }
         }else { //Imprimimos todas las paginas
             $item = 1;
-            for ($i = $beginPos; $item <= $item_bt; $i++) {
+			$split = 2;
+			$itemNum = $item_bt - 2 * $split;
+			$lPoint = $this->PageNo - intval($itemNum / 2);
+			$rPoint = $this->PageNo + intval($itemNum / 2);
+			$startPos = $endPos = 0;
+			if($rPoint <= ($item_bt - $split + 1)){
+				$startPos = 1;
+				$endPos = $itemNum + 2;
+				$navType = 'first';
+			}else if($rPoint > ($item_bt - $split + 1) && $rPoint < ($this->TotalPage - $split)){
+				$startPos = $lPoint;
+				$endPos = $rPoint;
+				$navType = 'middle';
+			}else if($rPoint >= ($this->TotalPage - $split)){
+				$startPos = $this->TotalPage - ($itemNum + 1);
+				$endPos = $this->TotalPage;
+				$navType = 'last';
+			}
+			if($navType == 'middle' || $navType == 'last'){
+					$thePage = 1;
+					$url = (empty($urlPage))? '?'.$var.'='.$thePage : sprintf($urlPage, $thePage);
+                    $page = ($this->options['ajax'])? 'javascript:void(0)' : $url;
+                    $pagination.= "<li><a class='_page' href='".$page."' rel='$thePage'>$thePage</a></li>";
+					$pagination.= "<li class='separator'><span>...</span></li>";
+			}
+            for ($i = $startPos; $i <= $endPos; $i++) {
+				
                 if ($i <= $this->TotalPage) {
                     if ($this->PageNo == $i)
                         $pagination.= "<li class='active'><span>$i</span></li>";
@@ -343,8 +369,14 @@ class teaPagination {
                         $pagination.= "<li><a class='_page' href='".$page."' rel='$i'>$i</a></li>";
                     }    
                 }
-                $item++;
             }
+			if($navType == 'middle' || $navType == 'first'){
+				$thePage = $this->TotalPage;
+				$url = (empty($urlPage))? '?'.$var.'='.$thePage : sprintf($urlPage, $thePage);
+				$page = ($this->options['ajax'])? 'javascript:void(0)' : $url;
+				$pagination.= "<li class='separator'><span>...</span></li>";
+				$pagination.= "<li><a class='_page' href='".$page."' rel='$thePage'>$thePage</a></li>";
+			}
         }
         if ($this->PageNo < $lastpage) {
             if ($this->options['buttons']['btNext']){
